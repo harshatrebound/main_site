@@ -100,6 +100,7 @@ const GradientHero: React.FC<GradientHeroProps> = ({ className }) => {
               initial="hidden"
               animate={inView ? "visible" : "hidden"}
               variants={fadeInScale}
+              className="sm:w-full"
             >
               <StatNumber>{stat.number}</StatNumber>
               <StatLabel>{stat.label}</StatLabel>
@@ -107,7 +108,7 @@ const GradientHero: React.FC<GradientHeroProps> = ({ className }) => {
           ))}
         </StatsContainer>
       </HeroContainer>
-      <div className="h-[100px] bg-white" /> {/* Spacer for stats overlap */}
+      <div className="h-[100px] md:h-[100px] sm:h-[200px] bg-white" /> {/* Adjusted spacer for mobile */}
     </div>
   );
 };

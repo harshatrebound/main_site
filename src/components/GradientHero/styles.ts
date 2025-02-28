@@ -40,10 +40,15 @@ export const StatsContainer = styled(motion.div)`
   max-width: 1200px;
   
   @media (max-width: 768px) {
-    transform: translate(-50%, 30%);
-    gap: 16px;
+    transform: translate(-50%, 25%);
+    gap: 12px;
     flex-direction: column;
     align-items: center;
+  }
+
+  @media (max-width: 480px) {
+    transform: translate(-50%, 20%);
+    gap: 8px;
   }
 `;
 
@@ -57,8 +62,13 @@ export const StatCard = styled(motion.div)`
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 
   @media (max-width: 768px) {
-    padding: 24px;
+    padding: 20px;
     max-width: 320px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 16px;
+    max-width: 280px;
   }
 `;
 
@@ -72,6 +82,11 @@ export const StatNumber = styled.div`
   margin-bottom: 8px;
   font-family: Outfit, sans-serif;
   line-height: 1;
+
+  @media (max-width: 480px) {
+    font-size: 2.5rem;
+    margin-bottom: 4px;
+  }
 `;
 
 export const StatLabel = styled.div`
@@ -81,6 +96,11 @@ export const StatLabel = styled.div`
   line-height: 1.4;
   font-family: Outfit, sans-serif;
   font-weight: 500;
+
+  @media (max-width: 480px) {
+    font-size: 1rem;
+    line-height: 1.3;
+  }
 `;
 
 export const ContentContainer = styled(motion.div)`
@@ -109,6 +129,10 @@ export const Title = styled(motion.h1)`
     font-size: 40px;
     margin-bottom: 16px;
   }
+  
+  @media (max-width: 480px) {
+    font-size: 32px;
+  }
 `;
 
 export const Subtitle = styled(motion.p)`
@@ -123,5 +147,10 @@ export const Subtitle = styled(motion.p)`
   @media (max-width: 768px) {
     font-size: 20px;
     margin-bottom: 32px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 18px;
+    margin-bottom: 24px;
   }
 `;
