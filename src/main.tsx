@@ -17,6 +17,8 @@ import ActivityDetail from './pages/ActivityDetail'
 import JobsPage from './pages/Jobs'
 import Blog from './pages/Blog'
 import BlogPost from './pages/BlogPost/index'
+import TeamBuilding from './pages/TeamBuilding'
+import TeamBuildingDetail from './pages/TeamBuilding/[slug]'
 import { CombinedProvider } from './contexts/TeamOutingAdsContext'
 
 createRoot(document.getElementById('root')!).render(
@@ -39,6 +41,8 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/jobs" element={<JobsPage />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:blogSlug" element={<BlogPost />} />
+            <Route path="/teambuilding" element={<TeamBuilding />} />
+            <Route path="/teambuilding/:slug" element={<TeamBuildingDetail />} />
           </Routes>
         </Router>
       </CombinedProvider>
