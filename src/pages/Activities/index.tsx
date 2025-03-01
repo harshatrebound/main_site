@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { FiArrowRight, FiMapPin, FiClock, FiUsers, FiStar } from 'react-icons/fi';
+import { FiArrowRight, FiMapPin, FiClock, FiUsers, FiStar, FiSearch } from 'react-icons/fi';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import ContactSection from '../../components/ContactSection';
@@ -10,38 +10,53 @@ import { useDestinations, useActivities } from '../../lib/hooks/useSupabaseData'
 
 const ITEMS_PER_PAGE = 12;
 
+// Define activity categories based on activity_type
+const ACTIVITY_CATEGORIES = [
+  { id: 'all', label: 'All Activities', type: null },
+  { id: 'indoor', label: 'Indoor Activities', type: ['Indoor', 'Indoor / Outdoor', 'Indoor/Outdoor'] },
+  { id: 'outdoor', label: 'Outdoor Activities', type: ['Outdoor', 'Indoor / Outdoor', 'Indoor/Outdoor'] },
+  { id: 'outbound', label: 'Outbound Activities', type: 'Outbound' },
+  { id: 'virtual', label: 'Virtual Activities', type: 'Virtual' }
+];
+
 const Activities = () => {
   const [activeTab, setActiveTab] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const { destinations } = useDestinations();
   const { activities, loading: activitiesLoading } = useActivities();
   const [filteredActivities, setFilteredActivities] = useState(activities || []);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Get unique activity_main_tags
-  const activityTags = ['all', ...new Set(activities?.map(activity => 
-    activity.activity_main_tag || 'uncategorized'
-  ).filter(Boolean))];
-
   useEffect(() => {
     if (activities) {
-      if (activeTab === 'all') {
-        setFilteredActivities(activities);
-      } else {
-        setFilteredActivities(activities.filter(activity => 
-          activity.activity_main_tag === activeTab
-        ));
+      let filtered = activities;
+      
+      // Filter by category
+      if (activeTab !== 'all') {
+        const category = ACTIVITY_CATEGORIES.find(cat => cat.id === activeTab);
+        if (category?.type) {
+          filtered = filtered.filter(activity => 
+            Array.isArray(category.type) 
+              ? category.type.includes(activity.activity_type)
+              : activity.activity_type === category.type
+          );
+        }
       }
-      // Reset to first page when changing tabs
+      
+      // Filter by search query
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        filtered = filtered.filter(activity =>
+          activity.name.toLowerCase().includes(query) ||
+          activity.tagline?.toLowerCase().includes(query) ||
+          activity.activity_type?.toLowerCase().includes(query)
+        );
+      }
+      
+      setFilteredActivities(filtered);
       setCurrentPage(1);
     }
-  }, [activeTab, activities]);
-
-  const formatTagName = (tag: string) => {
-    return tag
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  };
+  }, [activeTab, activities, searchQuery]);
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredActivities.length / ITEMS_PER_PAGE);
@@ -108,21 +123,35 @@ const Activities = () => {
             </p>
           </div>
 
-          {/* Tabs */}
-          <div className="flex flex-wrap justify-center gap-4 mb-12">
-            {activityTags.map((tag) => (
-              <button
-                key={tag}
-                onClick={() => setActiveTab(tag)}
-                className={`px-6 py-3 rounded-full text-base font-medium transition-all ${
-                  activeTab === tag
-                    ? 'bg-gradient-to-r from-[#FF4C39] to-[#FFB573] text-white'
-                    : 'bg-gray-100 text-[#636363] hover:bg-gray-200'
-                }`}
-              >
-                {formatTagName(tag)}
-              </button>
-            ))}
+          {/* Activity Category Tabs */}
+          <div className="mb-8">
+            <div className="flex flex-nowrap overflow-x-auto pb-4 gap-4 -mx-4 px-4 sm:flex-wrap sm:justify-center sm:overflow-visible sm:pb-0 hide-scrollbar">
+              {ACTIVITY_CATEGORIES.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => setActiveTab(category.id)}
+                  className={`whitespace-nowrap px-6 py-3 rounded-full text-base font-medium transition-all ${
+                    activeTab === category.id
+                      ? 'bg-gradient-to-r from-[#FF4C39] to-[#FFB573] text-white shadow-md'
+                      : 'bg-gray-100 text-[#636363] hover:bg-gray-200'
+                  }`}
+                >
+                  {category.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Search Bar */}
+          <div className="relative max-w-2xl mx-auto mb-12">
+            <input
+              type="text"
+              placeholder="Search activities..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-4 py-3 pl-12 rounded-full border border-gray-200 focus:outline-none focus:border-[#FF4C39] focus:ring-1 focus:ring-[#FF4C39]"
+            />
+            <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
           </div>
 
           {/* Activities Grid */}
@@ -183,7 +212,7 @@ const Activities = () => {
             ))}
           </div>
 
-          {/* Pagination */}
+          {/* Simplified Pagination */}
           {totalPages > 1 && (
             <div className="flex justify-center gap-4 mt-8">
               <button
@@ -193,20 +222,8 @@ const Activities = () => {
               >
                 Previous
               </button>
-              <div className="flex items-center gap-2">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                      currentPage === page
-                        ? 'bg-gradient-to-r from-[#FF4C39] to-[#FFB573] text-white'
-                        : 'text-[#636363] hover:bg-gray-100'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
+              <div className="flex items-center px-4 text-[#636363]">
+                Page {currentPage} of {totalPages}
               </div>
               <button
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}

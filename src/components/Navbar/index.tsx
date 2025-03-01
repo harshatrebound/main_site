@@ -36,10 +36,6 @@ const navItems = [
     href: '/stays',
   },
   {
-    label: 'Team Outings',
-    href: '/team-outings',
-  },
-  {
     label: 'Activities',
     href: '/team-building-activity',
   },
