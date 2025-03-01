@@ -262,9 +262,9 @@ const Stays = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-[#f8f9fa] pt-14 sm:pt-16 md:pt-20">
+      <div className="min-h-screen bg-[#f8f9fa]">
         {/* Hero Section */}
-        <div className="relative bg-gradient-to-br from-[#003366] to-[#001a33] py-12 sm:py-16 md:py-24">
+        <div className="relative bg-gradient-to-br from-[#003366] to-[#001a33] pt-24 sm:pt-28 md:pt-32 pb-12 sm:pb-16 md:pb-24">
           <div className="absolute inset-0 bg-[url('/hero-pattern.svg')] opacity-10" />
           <div className="max-w-[1448px] mx-auto px-3 sm:px-4 md:px-8 lg:px-16 relative">
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4 md:mb-6 text-center max-w-3xl mx-auto px-2 sm:px-4">

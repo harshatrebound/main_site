@@ -203,10 +203,17 @@ const BlogSection = () => {
           variants={fadeInUp}
           className="text-center mb-14"
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 font-outfit bg-gradient-primary bg-clip-text text-transparent">
-            Latest from our Blog
+          <h2 className="text-base md:text-lg text-[#FF4C39] font-semibold mb-4">
+            LATEST INSIGHTS
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <h3 className="text-3xl md:text-4xl font-bold mb-6 font-outfit">
+            Latest from our{' '}
+            <span className="bg-gradient-to-r from-[#FF4C39] to-[#FFB573] bg-clip-text text-transparent">
+              Blog
+            </span>
+          </h3>
+          <div className="w-24 h-1.5 bg-gradient-to-r from-[#FF4C39] to-[#FFB573] mx-auto rounded-full mb-8"></div>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Stay updated with the latest trends, insights, and success stories in team building and corporate events
           </p>
         </motion.div>

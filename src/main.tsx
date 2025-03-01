@@ -20,6 +20,9 @@ import BlogPost from './pages/BlogPost/index'
 import TeamBuilding from './pages/TeamBuilding'
 import TeamBuildingDetail from './pages/TeamBuilding/[slug]'
 import { CombinedProvider } from './contexts/TeamOutingAdsContext'
+import CustomizedTrainingPage from './pages/CustomizedTraining'
+import CustomizedTrainingDetail from './pages/CustomizedTraining/[slug]'
+import ContactPage from './pages/Contact'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -43,6 +46,9 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/blog/:blogSlug" element={<BlogPost />} />
             <Route path="/teambuilding" element={<TeamBuilding />} />
             <Route path="/teambuilding/:slug" element={<TeamBuildingDetail />} />
+            <Route path="/customized-training" element={<CustomizedTrainingPage />} />
+            <Route path="/customized-training/:slug" element={<CustomizedTrainingDetail />} />
+            <Route path="/contact" element={<ContactPage />} />
           </Routes>
         </Router>
       </CombinedProvider>

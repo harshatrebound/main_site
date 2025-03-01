@@ -11,7 +11,6 @@ import {
   StatLabel,
 } from './styles';
 import { fadeInUp, fadeInScale, staggerChildren } from './animations';
-import { useActivities, useDestinations } from '../../lib/hooks/useSupabaseData';
 
 interface GradientHeroProps {
   className?: string;
@@ -32,34 +31,27 @@ const GradientHero: React.FC<GradientHeroProps> = ({ className }) => {
     triggerOnce: true
   });
 
-  const { activities, loading: activitiesLoading } = useActivities();
-  const { destinations, loading: destinationsLoading } = useDestinations();
-
   // Select a random team building image
   const heroImage = useMemo(() => {
     const randomIndex = Math.floor(Math.random() * teamBuildingImages.length);
     return teamBuildingImages[randomIndex];
   }, []);
 
-  // Calculate real-time stats
+  // Stats with hardcoded values
   const stats = [
     {
-      number: activities?.length.toString() || '0',
-      label: 'Unique Activities\nAvailable'
-    },
-    {
-      number: destinations?.length.toString() || '0',
-      label: 'Amazing Destinations\nto Explore'
+      number: '96,753+',
+      label: 'Employees\nengaged'
     },
     {
       number: '4.9/5',
       label: 'Stellar Feedback\non Google'
+    },
+    {
+      number: '550+',
+      label: 'Global organizations\ntrust us'
     }
   ];
-
-  if (activitiesLoading || destinationsLoading) {
-    return <div>Loading...</div>; // You might want to add a proper loading state UI
-  }
 
   return (
     <div className="relative">
