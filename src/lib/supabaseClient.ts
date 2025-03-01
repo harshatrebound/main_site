@@ -22,6 +22,7 @@ export interface Activity {
   slug: string;
   created_at: string;
   updated_at: string;
+  activity_main_tag?: string;
 }
 
 export interface Destination {

@@ -11,6 +11,7 @@ import StayDetail from './pages/StayDetail/index'
 import Stays from './pages/Stays'
 import TeamOutings from './pages/TeamOutings'
 import TeamOutingDetail from './pages/TeamOutingDetail'
+import Activities from './pages/Activities'
 import { CombinedProvider } from './contexts/TeamOutingAdsContext'
 
 createRoot(document.getElementById('root')!).render(
@@ -27,6 +28,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/stays/:staySlug" element={<StayDetail />} />
           <Route path="/team-outings" element={<TeamOutings />} />
           <Route path="/team-outings/:slug" element={<TeamOutingDetail />} />
+          <Route path="/team-building-activity" element={<Activities />} />
         </Routes>
       </Router>
     </CombinedProvider>
