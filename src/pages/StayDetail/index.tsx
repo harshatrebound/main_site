@@ -23,7 +23,7 @@ const extractTextFromHtml = (html: string) => {
 const StayDetail = () => {
   const { staySlug } = useParams<{ staySlug: string }>();
   const { stay, loading: stayLoading, error: stayError } = useStayBySlug(staySlug);
-  const { stays } = useStaysByDestinationId(stay?.destination_details?.id ? parseInt(stay.destination_details.id) : undefined);
+  const { stays } = useStaysByDestinationId(stay?.destination_details?.name);
   
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [galleryInitialIndex, setGalleryInitialIndex] = useState(0);

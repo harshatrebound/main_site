@@ -32,10 +32,6 @@ const navItems = [
     href: '/corporate-team-outing-places',
   },
   {
-    label: 'Regions',
-    href: '/team-outing-regions',
-  },
-  {
     label: 'Stays',
     href: '/stays',
   },
@@ -45,7 +41,7 @@ const navItems = [
   },
   {
     label: 'Activities',
-    href: '/activities',
+    href: '/team-building-activity',
   },
   {
     label: 'Contact',

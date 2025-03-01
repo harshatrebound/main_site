@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
-import { FiSearch, FiMapPin, FiStar, FiUsers, FiArrowRight } from 'react-icons/fi';
+import { FiSearch, FiMapPin, FiStar, FiArrowRight, FiHome, FiClock } from 'react-icons/fi';
 import { supabase } from '../../lib/supabaseClient';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
@@ -18,6 +18,9 @@ interface Stay {
   special_activities: string;
   destination: string;
   images: string[];
+  total_room_value: string;
+  check_in_value: string;
+  check_out_value: string;
 }
 
 interface Destination {
@@ -96,15 +99,16 @@ const Stays = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDestination, setSelectedDestination] = useState('');
-  const [selectedFacility, setSelectedFacility] = useState('');
-  const [selectedActivity, setSelectedActivity] = useState('');
+  const [roomRange, setRoomRange] = useState('');
+  const [checkInTime, setCheckInTime] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalFilteredResults, setTotalFilteredResults] = useState(0);
   const staysPerPage = 9;
 
   useEffect(() => {
     fetchDestinations();
     fetchStays();
-  }, [currentPage, searchTerm, selectedDestination, selectedFacility, selectedActivity]);
+  }, [currentPage, searchTerm, selectedDestination, roomRange, checkInTime]);
 
   const fetchDestinations = async () => {
     try {
@@ -123,31 +127,78 @@ const Stays = () => {
   const fetchStays = async () => {
     try {
       setLoading(true);
+      
+      // Build the main query
       let query = supabase
         .from('stays')
-        .select('*')
-        .range((currentPage - 1) * staysPerPage, currentPage * staysPerPage - 1);
+        .select('*');
 
       if (searchTerm) {
         query = query.or(`name.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%,facilities.ilike.%${searchTerm}%,special_activities.ilike.%${searchTerm}%`);
       }
 
       if (selectedDestination) {
-        query = query.eq('destination', selectedDestination);
+        query = query.ilike('destination', `%${selectedDestination}%`);
       }
 
-      if (selectedFacility) {
-        query = query.ilike('facilities', `%${selectedFacility}%`);
-      }
-
-      if (selectedActivity) {
-        query = query.ilike('special_activities', `%${selectedActivity}%`);
-      }
-
-      const { data, error } = await query;
+      // Execute the query to get all matching stays
+      const { data: allMatchingStays, error } = await query;
 
       if (error) throw error;
-      setStays(data || []);
+      
+      let filteredData = allMatchingStays || [];
+      
+      // Apply filtering for room range
+      if (roomRange && filteredData.length > 0) {
+        const [min, max] = roomRange.split('-').map(Number);
+        filteredData = filteredData.filter(stay => {
+          // Extract room number from HTML content
+          const roomValueStr = stay.total_room_value || '';
+          const roomMatch = roomValueStr.match(/Total Rooms:\s*(\d+)/i);
+          if (!roomMatch) return true; // Keep items without clear numbers
+          
+          const roomValue = parseInt(roomMatch[1], 10);
+          // More lenient check - if max is 500 (our highest range), don't enforce upper limit
+          if (max >= 500) {
+            return roomValue >= min;
+          }
+          return roomValue >= min && roomValue <= max;
+        });
+      }
+      
+      // Apply filtering for check-in time
+      if (checkInTime && filteredData.length > 0) {
+        const [startTime, endTime] = checkInTime.split('-');
+        filteredData = filteredData.filter(stay => {
+          // Extract check-in time from HTML content
+          const checkInValueStr = stay.check_in_value || '';
+          const timeMatch = checkInValueStr.match(/Check-In Time:?\s*(\d+):(\d+)\s*(AM|PM)/i);
+          if (!timeMatch) return true; // Keep items without clear time format
+          
+          // Convert to 24-hour format for comparison
+          let hours = parseInt(timeMatch[1], 10);
+          const minutes = parseInt(timeMatch[2], 10);
+          const period = timeMatch[3];
+          
+          if (period.toUpperCase() === 'PM' && hours < 12) hours += 12;
+          if (period.toUpperCase() === 'AM' && hours === 12) hours = 0;
+          
+          const timeValue = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+          
+          return timeValue >= startTime && timeValue <= endTime;
+        });
+      }
+      
+      // Store the total number of filtered results
+      setTotalFilteredResults(filteredData.length);
+      
+      // Apply pagination to the filtered results
+      const paginatedData = filteredData.slice(
+        (currentPage - 1) * staysPerPage, 
+        currentPage * staysPerPage
+      );
+      
+      setStays(paginatedData);
     } catch (error) {
       console.error('Error fetching stays:', error);
     } finally {
@@ -169,25 +220,41 @@ const Stays = () => {
     options: { value: string; label: string; }[];
   }) => (
     <div className="relative group w-full sm:flex-1 sm:min-w-[200px]">
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full appearance-none pl-10 sm:pl-12 pr-8 sm:pr-10 py-3 sm:py-4 bg-white border-2 border-gray-200 rounded-full text-sm sm:text-base text-[#1a1a1a] focus:outline-none focus:border-[#FF4C39] focus:ring-1 focus:ring-[#FF4C39] cursor-pointer hover:border-[#FF4C39] transition-colors duration-200"
-      >
-        <option value="">{label}</option>
-        {options.map(option => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-      <div className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-[#FF4C39] pointer-events-none">
-        {icon}
-      </div>
-      <div className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none">
-        <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
-          <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-        </svg>
+      <div className="flex items-center">
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full appearance-none pl-10 sm:pl-12 pr-8 sm:pr-10 py-3 sm:py-4 bg-white border-2 border-gray-200 rounded-full text-sm sm:text-base text-[#1a1a1a] focus:outline-none focus:border-[#FF4C39] focus:ring-1 focus:ring-[#FF4C39] cursor-pointer hover:border-[#FF4C39] transition-colors duration-200"
+        >
+          <option value="">{label}</option>
+          {options.map(option => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <div className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-[#FF4C39] pointer-events-none">
+          {icon}
+        </div>
+        <div className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none">
+          <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
+            <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+          </svg>
+        </div>
+        {value && (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              onChange('');
+            }}
+            className="absolute right-10 sm:right-12 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#FF4C39] transition-colors duration-200"
+            aria-label="Clear filter"
+          >
+            <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
+              <path d="M10 8.586L14.293 4.293a1 1 0 011.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 011.414-1.414L10 8.586z" />
+            </svg>
+          </button>
+        )}
       </div>
     </div>
   );
@@ -243,40 +310,98 @@ const Stays = () => {
                   label: dest.name
                 }))}
               />
-
+              
+              {/* Total Rooms Filter */}
               <FilterButton
-                icon={<FiStar className="w-4 h-4 sm:w-5 sm:h-5" />}
-                label="Facilities"
-                value={selectedFacility}
-                onChange={setSelectedFacility}
+                icon={<FiHome className="w-4 h-4 sm:w-5 sm:h-5" />}
+                label="Total Rooms"
+                value={roomRange}
+                onChange={setRoomRange}
                 options={[
-                  { value: 'Swimming Pool', label: 'Swimming Pool' },
-                  { value: 'Conference Room', label: 'Conference Room' },
-                  { value: 'Restaurant', label: 'Restaurant' },
-                  { value: 'Spa', label: 'Spa' },
-                  { value: 'Games Room', label: 'Games Room' }
+                  { value: '1-10', label: '1-10 Rooms' },
+                  { value: '11-20', label: '11-20 Rooms' },
+                  { value: '21-50', label: '21-50 Rooms' },
+                  { value: '51-100', label: '51-100 Rooms' },
+                  { value: '101-500', label: '100+ Rooms' }
                 ]}
               />
-
+              
+              {/* Check-in Time Filter */}
               <FilterButton
-                icon={<FiUsers className="w-4 h-4 sm:w-5 sm:h-5" />}
-                label="Activities"
-                value={selectedActivity}
-                onChange={setSelectedActivity}
+                icon={<FiClock className="w-4 h-4 sm:w-5 sm:h-5" />}
+                label="Check-in Time"
+                value={checkInTime}
+                onChange={setCheckInTime}
                 options={[
-                  { value: 'Team Building', label: 'Team Building' },
-                  { value: 'Adventure Sports', label: 'Adventure Sports' },
-                  { value: 'Water Sports', label: 'Water Sports' },
-                  { value: 'Indoor Games', label: 'Indoor Games' },
-                  { value: 'Outdoor Activities', label: 'Outdoor Activities' }
+                  { value: '00:00-06:00', label: 'Early Morning (12AM-6AM)' },
+                  { value: '06:00-12:00', label: 'Morning (6AM-12PM)' },
+                  { value: '12:00-18:00', label: 'Afternoon (12PM-6PM)' },
+                  { value: '18:00-23:59', label: 'Evening (6PM-12AM)' }
                 ]}
               />
             </div>
+            
+            {/* Reset Filters Button - Only show if any filter is active */}
+            {(selectedDestination || roomRange || checkInTime) && (
+              <div className="mt-3 sm:mt-4 flex justify-center">
+                <button
+                  onClick={() => {
+                    setSelectedDestination('');
+                    setRoomRange('');
+                    setCheckInTime('');
+                    setCurrentPage(1);
+                  }}
+                  className="text-sm sm:text-base text-[#FF4C39] hover:text-[#ff6c5c] font-medium flex items-center gap-1.5"
+                >
+                  <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                    <path d="M10 8.586L14.293 4.293a1 1 0 011.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 011.414-1.414L10 8.586z" />
+                  </svg>
+                  Reset All Filters
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Stays Grid */}
         <div className="max-w-[1448px] mx-auto px-4 md:px-8 lg:px-16 py-8 sm:py-16">
+          {/* Results Counter and Active Filters */}
+          <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+            {/* Results Counter */}
+            <div className="text-sm sm:text-base text-[#636363]">
+              {!loading && (
+                <>
+                  Showing {stays.length > 0 ? (currentPage - 1) * staysPerPage + 1 : 0} - {Math.min(currentPage * staysPerPage, totalFilteredResults)} of {totalFilteredResults} stays
+                </>
+              )}
+            </div>
+            
+            {/* Active Filters Indicator */}
+            {(selectedDestination || roomRange || checkInTime) && (
+              <div className="flex flex-wrap items-center gap-2 text-sm sm:text-base text-[#636363]">
+                <span className="font-medium">Active Filters:</span>
+                {selectedDestination && (
+                  <span className="bg-[#f8f9fa] px-3 py-1 rounded-full flex items-center gap-1.5">
+                    <FiMapPin className="text-[#FF4C39] w-3.5 h-3.5" />
+                    {selectedDestination}
+                  </span>
+                )}
+                {roomRange && (
+                  <span className="bg-[#f8f9fa] px-3 py-1 rounded-full flex items-center gap-1.5">
+                    <FiHome className="text-[#FF4C39] w-3.5 h-3.5" />
+                    {roomRange.split('-').map(Number).join('-')} Rooms
+                  </span>
+                )}
+                {checkInTime && (
+                  <span className="bg-[#f8f9fa] px-3 py-1 rounded-full flex items-center gap-1.5">
+                    <FiClock className="text-[#FF4C39] w-3.5 h-3.5" />
+                    Check-in: {checkInTime.replace('-', ' - ')}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
               {[1, 2, 3].map((index) => (
@@ -308,7 +433,7 @@ const Stays = () => {
                 </button>
                 <button
                   onClick={() => setCurrentPage(prev => prev + 1)}
-                  disabled={stays.length < staysPerPage}
+                  disabled={stays.length < staysPerPage || currentPage * staysPerPage >= totalFilteredResults}
                   className="px-4 sm:px-6 py-2 sm:py-3 rounded-full border-2 border-[#FF4C39] text-[#FF4C39] hover:bg-[#FF4C39] hover:text-white transition-colors duration-300 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-[#FF4C39] text-sm sm:text-base"
                 >
                   Next

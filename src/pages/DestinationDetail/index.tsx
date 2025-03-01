@@ -2,31 +2,13 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { useParams, Link } from 'react-router-dom';
-import { FiMapPin, FiUsers, FiArrowLeft, FiX, FiChevronLeft, FiChevronRight, FiCheck, FiClock, FiPlus } from 'react-icons/fi';
+import { FiMapPin, FiUsers, FiArrowLeft, FiX, FiChevronLeft, FiChevronRight, FiClock, FiPlus, FiArrowRight } from 'react-icons/fi';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import ContactSection from '../../components/ContactSection';
 import PartnersSection from '../../components/PartnersSection';
 import TestimonialsSection from '../../components/TestimonialsSection';
-import { useDestinationBySlug, useStaysByDestinationId } from '../../lib/hooks/useSupabaseData';
-
-// Mock gallery images - in a real implementation, these would come from the database
-const mockGalleryImages = [
-  { id: 1, url: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000', alt: 'Destination image 1' },
-  { id: 2, url: 'https://images.unsplash.com/photo-1564501049412-61c2a3083791?q=80&w=1000', alt: 'Destination image 2' },
-  { id: 3, url: 'https://images.unsplash.com/photo-1548013146-72479768bada?q=80&w=1000', alt: 'Destination image 3' },
-  { id: 4, url: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?q=80&w=1000', alt: 'Destination image 4' },
-  { id: 5, url: 'https://images.unsplash.com/photo-1563911302283-d2bc129e7570?q=80&w=1000', alt: 'Destination image 5' },
-  { id: 6, url: 'https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=1000', alt: 'Destination image 6' },
-  { id: 7, url: 'https://images.unsplash.com/photo-1573649800108-8b4f8b5fc03d?q=80&w=1000', alt: 'Destination image 7' },
-  { id: 8, url: 'https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=1000', alt: 'Destination image 8' },
-  { id: 9, url: 'https://images.unsplash.com/photo-1573649800108-8b4f8b5fc03d?q=80&w=1000', alt: 'Destination image 9' },
-  { id: 10, url: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000', alt: 'Destination image 10' },
-  { id: 11, url: 'https://images.unsplash.com/photo-1564501049412-61c2a3083791?q=80&w=1000', alt: 'Destination image 11' },
-  { id: 12, url: 'https://images.unsplash.com/photo-1548013146-72479768bada?q=80&w=1000', alt: 'Destination image 12' },
-  { id: 13, url: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?q=80&w=1000', alt: 'Destination image 13' },
-  { id: 14, url: 'https://images.unsplash.com/photo-1564501049412-61c2a3083791?q=80&w=1000', alt: 'Destination image 14' },
-];
+import { useDestinationBySlug, useStaysByDestinationId, useDestinations } from '../../lib/hooks/useSupabaseData';
 
 const GalleryModal = ({ 
   isOpen, 
@@ -107,11 +89,20 @@ const GalleryModal = ({
   );
 };
 
+interface Destination {
+  id: string;
+  name: string;
+  slug: string;
+  region?: string;
+  destination_main_image?: string;
+  destination_image?: string;
+}
+
 const DestinationDetail = () => {
   const { destinationSlug } = useParams<{ destinationSlug: string }>();
   const { destination, loading: destinationLoading, error: destinationError } = useDestinationBySlug(destinationSlug);
-  const destinationId = destination?.id ? Number(destination.id) : undefined;
-  const { stays, loading: staysLoading } = useStaysByDestinationId(destinationId);
+  const { stays, loading: staysLoading } = useStaysByDestinationId(destination?.name);
+  const { destinations } = useDestinations();
   
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [galleryInitialIndex, setGalleryInitialIndex] = useState(0);
@@ -150,11 +141,11 @@ const DestinationDetail = () => {
   }
 
   // Display only the first 4 images in the gallery, the rest will be shown when clicking "More"
-  const displayedImages = mockGalleryImages.slice(0, 4);
-  const remainingImagesCount = mockGalleryImages.length - 4;
+  // const displayedImages = mockGalleryImages.slice(0, 4);
+  // const remainingImagesCount = mockGalleryImages.length - 4;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#003366] via-[#002244] to-[#001a33]">
+    <div className="min-h-screen bg-white">
       {/* Navbar */}
       <Navbar />
 
@@ -164,131 +155,75 @@ const DestinationDetail = () => {
           <GalleryModal
             isOpen={isGalleryOpen}
             onClose={() => setIsGalleryOpen(false)}
-            images={mockGalleryImages}
+            images={stays
+              .filter(stay => stay.stay_image)
+              .map(stay => ({
+                id: stay.id,
+                url: stay.stay_image || '/placeholder-image.jpg',
+                alt: stay.name
+              }))}
             initialIndex={galleryInitialIndex}
           />
         )}
       </AnimatePresence>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-12 px-4 md:px-8 lg:px-16 max-w-[1400px] mx-auto">
-        <div className="mb-6">
+      <section className="pt-28 pb-12 px-4 md:px-8 lg:px-16 max-w-[1400px] mx-auto relative bg-white">
+        <div className="mb-8">
           <Link 
             to="/corporate-team-outing-places" 
-            className="inline-flex items-center text-[#636363] hover:text-[#FF4C39] transition-colors"
+            className="inline-flex items-center text-[#1a1a1a] hover:text-[#FF4C39] transition-colors font-medium"
           >
             <FiArrowLeft className="mr-2" />
-            Back to all destinations
+            All Destinations
           </Link>
         </div>
         
-        <motion.h1
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-3xl md:text-5xl font-bold text-white mb-6"
-        >
+        <h1 className="text-3xl md:text-4xl font-bold text-[#1a1a1a] mb-4">
           {destination.name}'s Top Spots for Team Fun
-        </motion.h1>
+        </h1>
         
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="text-lg text-white/80 mb-12 max-w-3xl font-['DM Sans']"
-        >
+        <p className="text-base md:text-lg text-[#636363] mb-8 max-w-3xl font-['DM Sans']">
           Elevate your team's energy with corporate team outing places in {destination.name} by Trebound. 
           Experience team-building activities in the {destination.region || 'City of Pearls'}.
-        </motion.p>
+        </p>
         
-        <div className="flex flex-col lg:flex-row w-full">
+        <div className="flex flex-col lg:flex-row w-full gap-4">
           {/* Main large image */}
-          <div className="lg:w-[65%] h-[400px] lg:h-[500px] relative rounded-md overflow-hidden cursor-pointer" onClick={() => openGallery(0)}>
+          <div className="lg:w-[65%] h-[500px] relative rounded-xl overflow-hidden cursor-pointer" onClick={() => openGallery(0)}>
             <motion.img 
               initial={{ opacity: 0, scale: 1.05 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5 }}
-              src={destination.destination_main_image || destination.destination_image || mockGalleryImages[0].url} 
-              alt={destination.name}
-              className="w-full h-full object-cover"
+              src={stays?.[0]?.stay_image || destination.destination_main_image || destination.destination_image} 
+              alt={stays?.[0]?.name || destination.name}
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
             />
           </div>
           
           {/* Thumbnail gallery */}
-          <div className="lg:w-[35%] lg:pl-2 flex flex-row lg:flex-col flex-wrap mt-2 lg:mt-0">
-            <div className="w-1/2 lg:w-full h-[150px] lg:h-[245px] pr-1 lg:pr-0 lg:mb-2">
-              <div className="grid grid-cols-2 h-full gap-1">
-                <motion.div
-                  initial={{ opacity: 0, scale: 1.05 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5, delay: 0.1 }}
-                  className="relative rounded-md overflow-hidden cursor-pointer h-full"
-                  onClick={() => openGallery(1)}
-                >
-                  <img 
-                    src={displayedImages[1]?.url || mockGalleryImages[1].url} 
-                    alt={displayedImages[1]?.alt || "Destination image"}
-                    className="w-full h-full object-cover"
-                  />
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, scale: 1.05 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  className="relative rounded-md overflow-hidden cursor-pointer h-full"
-                  onClick={() => openGallery(2)}
-                >
-                  <img 
-                    src={displayedImages[2]?.url || mockGalleryImages[2].url} 
-                    alt={displayedImages[2]?.alt || "Destination image"}
-                    className="w-full h-full object-cover"
-                  />
-                </motion.div>
-              </div>
-            </div>
-            <div className="w-1/2 lg:w-full h-[150px] lg:h-[245px] pl-1 lg:pl-0">
-              <div className="grid grid-cols-2 h-full gap-1">
-                <motion.div
-                  initial={{ opacity: 0, scale: 1.05 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
-                  className="relative rounded-md overflow-hidden cursor-pointer h-full"
-                  onClick={() => openGallery(3)}
-                >
-                  <img 
-                    src={displayedImages[3]?.url || mockGalleryImages[3].url} 
-                    alt={displayedImages[3]?.alt || "Destination image"}
-                    className="w-full h-full object-cover"
-                  />
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, scale: 1.05 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5, delay: 0.4 }}
-                  className="relative rounded-md overflow-hidden cursor-pointer h-full"
-                  onClick={() => openGallery(4)}
-                >
-                  {remainingImagesCount > 0 ? (
-                    <>
-                      <img 
-                        src={displayedImages[4]?.url || mockGalleryImages[4].url} 
-                        alt={displayedImages[4]?.alt || "Destination image"}
-                        className="w-full h-full object-cover brightness-50"
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center text-white">
-                        <span className="text-lg font-semibold">+{remainingImagesCount} More</span>
-                      </div>
-                    </>
-                  ) : (
-                    <img 
-                      src={displayedImages[4]?.url || mockGalleryImages[4].url} 
-                      alt={displayedImages[4]?.alt || "Destination image"}
-                      className="w-full h-full object-cover"
-                    />
-                  )}
-                </motion.div>
-              </div>
-            </div>
+          <div className="lg:w-[35%] grid grid-cols-2 gap-4">
+            {stays?.slice(1, 5).map((stay, index) => (
+              <motion.div
+                key={stay.id}
+                initial={{ opacity: 0, scale: 1.05 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.1 * (index + 1) }}
+                className={`relative rounded-xl overflow-hidden cursor-pointer ${index === 0 || index === 1 ? 'h-[242px]' : 'h-[242px]'}`}
+                onClick={() => openGallery(index + 1)}
+              >
+                <img 
+                  src={stay.stay_image}
+                  alt={stay.name}
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                />
+                {index === 3 && stays.length > 5 && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/50 hover:bg-black/60 transition-colors">
+                    <span className="text-lg font-medium text-white">+{stays.length - 5} More</span>
+                  </div>
+                )}
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
@@ -302,7 +237,7 @@ const DestinationDetail = () => {
                 Resorts & Stays
               </span>
               <h2 className="text-[40px] font-semibold font-['Inter'] leading-tight bg-gradient-to-b from-[#FF4C39] to-[#FFB573] bg-clip-text text-transparent">
-                Where You'll Be Staying.
+                Where You'll Be Staying
               </h2>
             </div>
             <p className="lg:max-w-md text-left lg:text-right text-base font-normal font-['DM Sans'] text-[#757575] lg:pt-6">
@@ -341,10 +276,10 @@ const DestinationDetail = () => {
                   transition={{ duration: 0.5, delay: index * 0.08 }}
                   className="w-full bg-[#eeeeee] rounded-[16px] hover:shadow-md transition-all duration-300 group"
                 >
-                  <div className="p-5 flex flex-col h-full">
-                    <div className="relative aspect-[386/304] rounded-[16px] overflow-hidden shadow-sm mb-4">
+                  <div className="p-5">
+                    <div className="relative aspect-[386/304] rounded-[16px] overflow-hidden mb-4">
                       <img 
-                        src={stay.banner_image_url || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80'} 
+                        src={stay.banner_image_url || stay.stay_image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80'} 
                         alt={stay.name}
                         className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
                       />
@@ -360,7 +295,7 @@ const DestinationDetail = () => {
                     
                     <div className="space-y-2 flex-1">
                       <h3 className="text-lg font-semibold font-['DM Sans'] text-[#313131]">
-                        Team Outing at {stay.name}
+                        {stay.name}
                       </h3>
                       <p className="text-base font-normal font-['DM Sans'] text-[#636363] line-clamp-2">
                         {stay.tagline || stay.stay_description?.substring(0, 100) || 'A Tranquil Oasis'}
@@ -368,16 +303,18 @@ const DestinationDetail = () => {
                     </div>
 
                     <div className="mt-4">
-                      <Link to={`/stays/${stay.slug}`}>
-                        <div className="relative w-full h-[45px] group">
-                          <div className="absolute inset-0 bg-gradient-to-r from-[#ff4c39] to-[#ffb573] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[8px]" />
-                          <button className="absolute inset-0 w-full h-full flex items-center justify-center border border-[#b1b1b1] rounded-[8px] group-hover:border-transparent transition-colors duration-300">
-                            <span className="text-base font-bold font-['DM Sans'] text-[#b1b1b1] group-hover:text-white transition-colors duration-300">
-                              View Details
-                            </span>
-                          </button>
-                        </div>
-                      </Link>
+                      <div className="relative w-full h-[45px] group">
+                        <div className="absolute inset-0 bg-gradient-to-b from-[#ff4c39] to-[#ffb573] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[8px]" />
+                        <Link 
+                          to={`/stays/${stay.slug}`}
+                          className="absolute inset-0 w-full h-full flex items-center justify-center gap-2 border border-[#b1b1b1] rounded-[8px] group-hover:border-transparent transition-colors duration-300"
+                        >
+                          <span className="text-base font-bold font-['DM Sans'] text-[#b1b1b1] group-hover:text-white transition-colors duration-300">
+                            Book Now
+                          </span>
+                          <FiArrowRight className="w-4 h-4 text-[#b1b1b1] group-hover:text-white transition-colors duration-300" />
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -488,87 +425,51 @@ const DestinationDetail = () => {
         </div>
       </section>
       
-      {/* Stay Description Section */}
-      <div className="mb-16 text-center">
-        <h2 className="text-4xl font-semibold mb-6 bg-gradient-to-r from-[#FF4C39] to-[#FFB573] bg-clip-text text-transparent font-['Inter']">Stay Description</h2>
-        
-        <div className="max-w-4xl mx-auto text-lg text-[#636363] font-['DM Sans']">
-          {stays && stays.length > 0 ? (
-            stays[0].stay_description ? (
-              <div className="text-left">
-                <p>{stays[0].stay_description}</p>
-              </div>
-            ) : (
-              <p className="text-left">
-                {stays[0].name} is a delightful blend of nature and leisure, offering an inviting atmosphere 
-                for team building, team offsite, and team outings. Surrounded by lush greenery, it provides a 
-                serene backdrop for teams to come together and unwind. The comfortable accommodations 
-                and range of amenities ensure a pleasant stay and a rejuvenating experience for your team.
-              </p>
-            )
-          ) : (
-            <p className="text-left">
-              {destination.name} is a delightful blend of nature and leisure, offering an inviting atmosphere 
-              for team building, team offsite, and team outings. Surrounded by lush greenery, it provides a 
-              serene backdrop for teams to come together and unwind. The comfortable accommodations 
-              and range of amenities ensure a pleasant stay and a rejuvenating experience for your team.
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Testimonial Quote Section */}
-      <section className="py-20 bg-[#f9f9f9]">
-        <TestimonialsSection />
-      </section>
-
-      {/* Similar Stays Section */}
-      <section className="w-full bg-white py-12">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-6 max-w-[1200px]">
-          {/* Header */}
+      {/* Destinations Grid Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-[1200px] mx-auto px-4 lg:px-6">
           <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6 lg:gap-12 mb-12">
             <div className="flex-1 max-w-2xl">
               <span className="inline-block text-lg font-medium font-['DM Sans'] text-[#636363] mb-2">
-                Nearby Luxury Stays
+                EXPLORE MORE
               </span>
               <h2 className="text-[40px] font-semibold font-['Inter'] leading-tight bg-gradient-to-b from-[#FF4C39] to-[#FFB573] bg-clip-text text-transparent">
-                Serene Stays, Lasting Memories.
+                Distinct Destinations,<br />Lasting Memories
               </h2>
             </div>
             <p className="lg:max-w-md text-left lg:text-right text-base font-normal font-['DM Sans'] text-[#757575] lg:pt-6">
-              Discover exquisite stays that offer the perfect blend of luxury, comfort, and unforgettable experiences.
+              Discover more amazing destinations perfect for your next team building adventure.
             </p>
           </div>
-
-          {/* Stay Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {stays && stays.length > 0 ? (
-              stays.slice(0, 3).map((stay, index) => (
-                <div key={stay.id || index} className="bg-white rounded-lg shadow-md overflow-hidden">
-                  <div className="relative aspect-[16/9]">
-                    <img
-                      src={stay.banner_image_url || stay.stay_image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000'}
-                      alt={stay.name}
-                      className="w-full h-full object-cover"
-                    />
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {destinations?.filter((dest: Destination) => dest.id !== destination?.id)
+              .slice(0, 6)
+              .map((dest: Destination) => (
+                <Link key={dest.id} to={`/destinations/${dest.slug}`} className="block">
+                  <div 
+                    className="relative bg-[#eeeeee] rounded-lg overflow-hidden aspect-square group"
+                    style={{
+                      backgroundImage: `url(${dest.destination_main_image || dest.destination_image})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center'
+                    }}
+                  >
+                    <div className="absolute top-0 left-0 p-5">
+                      <h3 className="text-xl font-semibold text-white">
+                        {dest.name}
+                      </h3>
+                    </div>
+                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-semibold mb-2">{stay.name}</h3>
-                    <p className="text-gray-600 mb-4">{stay.description?.substring(0, 100)}...</p>
-                    <Link
-                      to={`/stays/${stay.slug}`}
-                      className="text-primary hover:text-primary-dark transition-colors"
-                    >
-                      View Details
-                    </Link>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="col-span-3 text-center py-8">
-                <p className="text-gray-600">No stays available at this time.</p>
-              </div>
-            )}
+                </Link>
+              ))}
+          </div>
+          
+          <div className="text-center mt-12">
+            <Link to="/corporate-team-outing-places" className="inline-block px-6 py-3 border border-[#FF4C39] text-[#FF4C39] rounded-full hover:bg-gradient-to-b hover:from-[#FF4C39] hover:to-[#FFB573] hover:text-white transition-all duration-300">
+              View All Destinations
+            </Link>
           </div>
         </div>
       </section>
@@ -586,49 +487,6 @@ const DestinationDetail = () => {
 
       {/* Footer */}
       <Footer />
-
-      {/* Stay Facilities Card */}
-      <div className="bg-gray-100 rounded-md p-6">
-        <h3 className="text-xl font-semibold mb-4 bg-gradient-to-r from-[#FF4C39] to-[#FFB573] bg-clip-text text-transparent">Stay Facilities</h3>
-        <ul className="text-left space-y-1">
-          <li className="flex items-start mb-2">
-            <FiCheck className="min-w-[16px] h-4 mt-1 text-[#FF4C39]" />
-            <span className="ml-2">24-hour front desk</span>
-          </li>
-          <li className="flex items-start mb-2">
-            <FiCheck className="min-w-[16px] h-4 mt-1 text-[#FF4C39]" />
-            <span className="ml-2">Audio/Visual Equipment</span>
-          </li>
-          <li className="flex items-start mb-2">
-            <FiCheck className="min-w-[16px] h-4 mt-1 text-[#FF4C39]" />
-            <span className="ml-2">Bar/Lounge</span>
-          </li>
-          <li className="flex items-start mb-2">
-            <FiCheck className="min-w-[16px] h-4 mt-1 text-[#FF4C39]" />
-            <span className="ml-2">Newspaper</span>
-          </li>
-          <li className="flex items-start mb-2">
-            <FiCheck className="min-w-[16px] h-4 mt-1 text-[#FF4C39]" />
-            <span className="ml-2">Free Parking</span>
-          </li>
-          <li className="flex items-start mb-2">
-            <FiCheck className="min-w-[16px] h-4 mt-1 text-[#FF4C39]" />
-            <span className="ml-2">Restaurant</span>
-          </li>
-          <li className="flex items-start mb-2">
-            <FiCheck className="min-w-[16px] h-4 mt-1 text-[#FF4C39]" />
-            <span className="ml-2">Room Service</span>
-          </li>
-          <li className="flex items-start mb-2">
-            <FiCheck className="min-w-[16px] h-4 mt-1 text-[#FF4C39]" />
-            <span className="ml-2">Indoor Sports area</span>
-          </li>
-          <li className="flex items-start mb-2">
-            <FiCheck className="min-w-[16px] h-4 mt-1 text-[#FF4C39]" />
-            <span className="ml-2">Outdoor Sports area</span>
-          </li>
-        </ul>
-      </div>
     </div>
   );
 };

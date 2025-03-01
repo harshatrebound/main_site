@@ -396,29 +396,29 @@ export const useDestinationBySlug = (slug?: string) => {
   return { destination, loading, error };
 };
 
-export const useStaysByDestinationId = (destinationId?: number) => {
+export const useStaysByDestinationId = (destinationName?: string) => {
   const [stays, setStays] = useState<Stay[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!destinationId) {
-      setLoading(false);
-      return;
-    }
-
     const fetchStays = async () => {
       try {
-        setLoading(true);
+        if (!destinationName) {
+          setStays([]);
+          return;
+        }
+
         const { data, error } = await supabase
           .from('stays')
           .select('*')
-          .eq('destination_id', destinationId)
+          .eq('destination', destinationName)
           .order('created_on', { ascending: false });
 
         if (error) throw error;
         setStays(data || []);
       } catch (err) {
+        console.error('Error fetching stays:', err);
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
         setLoading(false);
@@ -426,7 +426,22 @@ export const useStaysByDestinationId = (destinationId?: number) => {
     };
 
     fetchStays();
-  }, [destinationId]);
+
+    // Set up real-time subscription
+    const subscription = supabase
+      .channel('stays_changes')
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'stays' },
+        (payload) => {
+          console.log('Stays change received!', payload);
+          fetchStays(); // Refresh data when changes occur
+      })
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [destinationName]);
 
   return { stays, loading, error };
 };
