@@ -4,6 +4,7 @@ import { FiX } from 'react-icons/fi';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { supabase } from '../../lib/supabaseClient';
+import PartnersSection from '../../components/PartnersSection';
 
 interface JobListing {
   id: number;
@@ -441,7 +442,7 @@ const JobsPage = () => {
         )}
       </AnimatePresence>
 
-      {/* Contact CTA Section */}
+      {/* Contact Section */}
       <section className="py-20 px-4 md:px-8 lg:px-16 bg-gradient-to-br from-[#003366] via-[#002244] to-[#001a33]">
         <div className="max-w-[1448px] mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 font-['Outfit']">
@@ -459,45 +460,8 @@ const JobsPage = () => {
         </div>
       </section>
 
-      {/* Clientele Section */}
-      <section className="py-20 px-4 md:px-8 lg:px-16">
-        <div className="max-w-[1448px] mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-[#636363] text-lg mb-2 font-['DM Sans']">Our Clients</p>
-            <h2 className="text-2xl md:text-3xl font-bold font-['Outfit']">
-              <span className="bg-gradient-to-r from-[#FF4C39] to-[#FFB573] bg-clip-text text-transparent">
-                Companies That Trust Us
-              </span>
-            </h2>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 items-center justify-items-center">
-            <div className="w-32 h-32 flex items-center justify-center grayscale hover:grayscale-0 transition-all duration-300">
-              <img src="/images/clients/client1.png" alt="Client 1" className="max-w-full max-h-full object-contain" />
-            </div>
-            <div className="w-32 h-32 flex items-center justify-center grayscale hover:grayscale-0 transition-all duration-300">
-              <img src="/images/clients/client2.png" alt="Client 2" className="max-w-full max-h-full object-contain" />
-            </div>
-            <div className="w-32 h-32 flex items-center justify-center grayscale hover:grayscale-0 transition-all duration-300">
-              <img src="/images/clients/client3.png" alt="Client 3" className="max-w-full max-h-full object-contain" />
-            </div>
-            <div className="w-32 h-32 flex items-center justify-center grayscale hover:grayscale-0 transition-all duration-300">
-              <img src="/images/clients/client4.png" alt="Client 4" className="max-w-full max-h-full object-contain" />
-            </div>
-            <div className="w-32 h-32 flex items-center justify-center grayscale hover:grayscale-0 transition-all duration-300">
-              <img src="/images/clients/client5.png" alt="Client 5" className="max-w-full max-h-full object-contain" />
-            </div>
-            <div className="w-32 h-32 flex items-center justify-center grayscale hover:grayscale-0 transition-all duration-300">
-              <img src="/images/clients/client6.png" alt="Client 6" className="max-w-full max-h-full object-contain" />
-            </div>
-            <div className="w-32 h-32 flex items-center justify-center grayscale hover:grayscale-0 transition-all duration-300">
-              <img src="/images/clients/client7.png" alt="Client 7" className="max-w-full max-h-full object-contain" />
-            </div>
-            <div className="w-32 h-32 flex items-center justify-center grayscale hover:grayscale-0 transition-all duration-300">
-              <img src="/images/clients/client8.png" alt="Client 8" className="max-w-full max-h-full object-contain" />
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Partners Section */}
+      <PartnersSection />
 
       <Footer />
     </div>
