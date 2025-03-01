@@ -25,19 +25,19 @@ const SkipSearchPopup = ({ onClose, isVisible }: SkipSearchPopupProps) => {
             initial={{ y: 20 }}
             animate={{ y: 0 }}
             exit={{ y: 20 }}
-            className="relative bg-white rounded-xl shadow-xl max-w-4xl w-full overflow-hidden"
+            className="relative bg-white rounded-xl shadow-xl w-[95%] max-w-2xl overflow-hidden"
           >
             {/* Close Button */}
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 z-10 text-gray-500 hover:text-gray-700 transition-colors"
+              className="absolute top-3 right-3 z-10 text-gray-500 hover:text-gray-700 transition-colors"
             >
-              <FiX size={24} />
+              <FiX size={20} />
             </button>
 
             <div className="flex flex-col md:flex-row">
               {/* Image Section */}
-              <div className="md:w-[40%]">
+              <div className="md:w-[35%] h-[200px] md:h-auto">
                 <img
                   src="https://cdn.prod.website-files.com/655e49f111202615f47a3d82/6631fb65afcee8415edaa6a8_Vaish.jpg"
                   alt="Team Building Expert"
@@ -46,76 +46,76 @@ const SkipSearchPopup = ({ onClose, isVisible }: SkipSearchPopupProps) => {
               </div>
 
               {/* Content Section */}
-              <div className="md:w-[60%] p-8 md:p-10">
-                <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <div className="md:w-[65%] p-6">
+                <h2 className="text-xl md:text-2xl font-bold mb-3">
                   <span className="bg-gradient-to-r from-[#FF4C39] to-[#FFB573] bg-clip-text text-transparent">
                     Skip the Search
                   </span>
                   <span className="text-[#313131]">—Your Ideal Teambuilding Plan is Just a Click Away!</span>
                 </h2>
 
-                <div className="mb-6">
-                  <p className="text-lg text-[#636363] mb-2">
+                <div className="mb-4">
+                  <p className="text-base text-[#636363] mb-1">
                     We've been doing this for <span className="font-semibold">more than 10 years now</span>. Tell us what you need.
                   </p>
-                  <p className="text-lg text-[#636363]">
+                  <p className="text-base text-[#636363]">
                     Skip the search, sit back, and relax.
                   </p>
                 </div>
 
-                <form className="space-y-4">
+                <form className="space-y-3">
                   <input
                     type="text"
                     placeholder="Name"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#FF4C39]"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#FF4C39]"
                   />
                   <input
                     type="email"
                     placeholder="Work Email"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#FF4C39]"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#FF4C39]"
                   />
-                  <input
-                    type="tel"
-                    placeholder="Phone"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#FF4C39]"
-                  />
-                  <input
-                    type="text"
-                    placeholder="No of Pax"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#FF4C39]"
-                  />
+                  <div className="grid grid-cols-2 gap-3">
+                    <input
+                      type="tel"
+                      placeholder="Phone"
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#FF4C39]"
+                    />
+                    <input
+                      type="text"
+                      placeholder="No of Pax"
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#FF4C39]"
+                    />
+                  </div>
                   <input
                     type="text"
                     placeholder="Destination (Eg. Bangalore)"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#FF4C39]"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#FF4C39]"
                   />
                   <textarea
                     placeholder="More details? (*For priority)"
-                    rows={3}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#FF4C39]"
+                    rows={2}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#FF4C39] resize-none"
                   />
-                  <div>
-                    <select className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#FF4C39] bg-white">
-                      <option value="">Select type of activity</option>
-                      <option value="team_outing">Team Outing</option>
-                      <option value="team_building">Team Building</option>
-                      <option value="corporate_event">Corporate Event</option>
-                    </select>
-                  </div>
+                  <select className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#FF4C39] bg-white">
+                    <option value="">Select type of activity</option>
+                    <option value="team_outing">Team Outing</option>
+                    <option value="team_building">Team Building</option>
+                    <option value="corporate_event">Corporate Event</option>
+                  </select>
                   <button
                     type="submit"
-                    className="w-full py-4 bg-gradient-to-r from-[#FF4C39] to-[#FFB573] text-white rounded-lg font-semibold hover:opacity-90 transition-opacity"
+                    className="w-full py-3 bg-gradient-to-r from-[#FF4C39] to-[#FFB573] text-white rounded-lg font-semibold text-sm hover:opacity-90 transition-opacity"
                   >
                     Submit
                   </button>
                 </form>
 
-                <div className="mt-6 flex items-center justify-between">
+                <div className="mt-4 flex items-center justify-between text-sm">
                   <div className="flex items-center">
                     <img
                       src="https://cdn.prod.website-files.com/655e49f111202615f47a3d82/6631fb65afcee8415edaa6a8_Vaish.jpg"
                       alt="Google Rating"
-                      className="w-6 h-6 rounded-full"
+                      className="w-5 h-5 rounded-full"
                     />
                     <span className="ml-2 text-[#636363]">Excellent</span>
                   </div>

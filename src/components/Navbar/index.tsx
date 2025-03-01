@@ -40,6 +40,10 @@ const navItems = [
     href: '/team-building-activity',
   },
   {
+    label: 'Careers',
+    href: '/jobs',
+  },
+  {
     label: 'Contact',
     href: '/contact',
   },

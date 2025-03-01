@@ -200,12 +200,15 @@ const Activities = () => {
 
                   <div className="relative w-full h-[45px] group">
                     <div className="absolute inset-0 bg-gradient-to-b from-[#ff4c39] to-[#ffb573] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
-                    <button className="absolute inset-0 w-full h-full flex items-center justify-center gap-2 border border-[#b1b1b1] rounded-lg group-hover:border-transparent transition-colors duration-300">
+                    <Link 
+                      to={`/team-building-activity/${activity.slug || activity.id}`} 
+                      className="absolute inset-0 w-full h-full flex items-center justify-center gap-2 border border-[#b1b1b1] rounded-lg group-hover:border-transparent transition-colors duration-300"
+                    >
                       <span className="font-medium text-[#b1b1b1] group-hover:text-white transition-colors duration-300">
                         Explore
                       </span>
                       <FiArrowRight className="w-4 h-4 text-[#b1b1b1] group-hover:text-white transition-colors duration-300" />
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </motion.div>
