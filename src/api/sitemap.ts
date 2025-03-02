@@ -3,7 +3,7 @@ import express, { Request, Response } from 'express';
 
 const router = express.Router();
 
-router.get('/sitemap.xml', async (req: Request, res: Response) => {
+router.get('/sitemap.xml', async (_req: Request, res: Response) => {
   try {
     const sitemap = await generateSitemap();
     
