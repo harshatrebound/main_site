@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { supabase } from './supabaseClient.js';
+import { supabase } from './supabaseClient.ts';
 
 interface SitemapURL {
   loc: string;

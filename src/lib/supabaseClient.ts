@@ -1,9 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
-import dotenv from 'dotenv';
 
-// Load environment variables
-dotenv.config();
-
+// Browser environment uses Vite's import.meta.env
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
