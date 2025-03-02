@@ -66,8 +66,29 @@ const CustomizedTrainingPage = () => {
   return (
     <>
       <Helmet>
-        <title>Customized Training Programs | Trebound</title>
-        <meta name="description" content="Discover our customized corporate training programs designed to enhance your team's skills and performance. Expert-led sessions tailored to your needs." />
+        <title>Customized Training Programs | Corporate Training Solutions | Trebound</title>
+        <meta 
+          name="description" 
+          content="Transform your team with Trebound's customized corporate training programs. Expert-led, tailored solutions for leadership, communication, and professional development."
+        />
+        <meta name="keywords" content="corporate training, customized training, professional development, leadership training, team development" />
+        <meta name="author" content="Trebound" />
+        <meta name="robots" content="index, follow" />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Trebound" />
+        <meta property="og:title" content="Customized Training Programs | Corporate Training Solutions | Trebound" />
+        <meta property="og:description" content="Transform your team with Trebound's customized corporate training programs. Expert-led, tailored solutions for leadership, communication, and professional development." />
+        <meta property="og:url" content={window.location.href} />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Customized Training Programs | Corporate Training Solutions | Trebound" />
+        <meta name="twitter:description" content="Transform your team with Trebound's customized corporate training programs. Expert-led, tailored solutions for leadership, communication, and professional development." />
+        
+        {/* Additional SEO */}
+        <link rel="canonical" href={window.location.href} />
       </Helmet>
 
       <div className="min-h-screen bg-white">

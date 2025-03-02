@@ -1,22 +1,74 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
-import { FiArrowRight } from 'react-icons/fi';
+import { FiArrowRight, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import PartnersSection from '../../components/PartnersSection';
 
+// Add custom styles
+const styles = {
+  textShadow: {
+    textShadow: '0 1px 3px rgba(0, 0, 0, 0.7)'
+  }
+};
+
 const ContactPage = () => {
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
+    work_email: '',
     phone: '',
     company: '',
-    message: ''
+    message: '',
+    preferred_destination: 'Not specified',
+    number_of_pax: 0,
+    activity_type: 'exploring',
+    page_url: '',
+    page_heading: 'Contact Page Form'
   });
+  const [submissionStatus, setSubmissionStatus] = useState<{
+    success?: boolean;
+    message?: string;
+    visible: boolean;
+  }>({ visible: false });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      page_url: window.location.href
+    }));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setSubmissionStatus({ visible: false });
+    
+    // Convert the message to more_details
+    const submissionData = {
+      ...formData,
+      more_details: formData.message
+    };
+    
+    // Remove any extra fields not in the schema
+    const finalSubmitData = {
+      name: submissionData.name,
+      work_email: submissionData.work_email,
+      preferred_destination: submissionData.preferred_destination,
+      phone: submissionData.phone,
+      number_of_pax: submissionData.number_of_pax,
+      more_details: submissionData.more_details,
+      activity_type: submissionData.activity_type,
+      page_url: submissionData.page_url,
+      page_heading: submissionData.page_heading
+    };
+    
+    // For debugging - log the data being sent
+    console.log('SUBMISSION DATA:', finalSubmitData);
+    console.log('Activity type:', typeof finalSubmitData.activity_type, finalSubmitData.activity_type);
+    console.log('Number of pax:', typeof finalSubmitData.number_of_pax, finalSubmitData.number_of_pax);
+    
     try {
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/contact_submissions`,
@@ -27,32 +79,108 @@ const ContactPage = () => {
             'Content-Type': 'application/json',
             'Prefer': 'return=minimal'
           },
-          body: JSON.stringify(formData)
+          body: JSON.stringify(finalSubmitData)
         }
       );
 
+      // For debugging - log the response status
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries([...response.headers.entries()]));
+
       if (response.ok) {
-        // Reset form
+        // Reset form when successful
         setFormData({
           name: '',
-          email: '',
+          work_email: '',
           phone: '',
           company: '',
-          message: ''
+          message: '',
+          preferred_destination: 'Not specified',
+          number_of_pax: 0,
+          activity_type: 'exploring',
+          page_url: window.location.href,
+          page_heading: 'Contact Page Form'
         });
-        alert('Thank you for your message. We will get back to you shortly.');
+        setSubmissionStatus({
+          success: true,
+          message: 'Thank you for your message. We will get back to you shortly.',
+          visible: true
+        });
+        
+        setTimeout(() => {
+          setSubmissionStatus(prev => ({ ...prev, visible: false }));
+        }, 6000);
+      } else {
+        // Get more detailed error information
+        let errorMessage = 'Server responded with an error';
+        try {
+          const errorData = await response.text();
+          console.error('Error response:', response.status, errorData);
+          
+          // Try to parse as JSON if possible
+          try {
+            const jsonError = JSON.parse(errorData);
+            errorMessage = jsonError.message || jsonError.error || errorMessage;
+          } catch (e) {
+            // If not JSON, use the raw text
+            if (errorData) errorMessage = errorData;
+          }
+        } catch (e) {
+          console.error('Failed to parse error response', e);
+        }
+        
+        throw new Error(errorMessage);
       }
     } catch (error) {
       console.error('Error submitting form:', error);
-      alert('There was an error submitting your message. Please try again.');
+      setSubmissionStatus({
+        success: false,
+        message: error instanceof Error ? 
+          `Error: ${error.message}` : 
+          'There was an error submitting your message. Please try again.',
+        visible: true
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    
     setFormData(prev => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [name]: name === 'number_of_pax' ? (parseInt(value) || 0) : value
     }));
+  };
+
+  const StatusMessage = () => {
+    if (!submissionStatus.visible) return null;
+    
+    return (
+      <AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          className={`p-4 rounded-lg mb-6 flex items-center gap-3 ${
+            submissionStatus.success
+              ? 'bg-gradient-to-r from-[#FF4C39]/10 to-[#FFB573]/10 border border-[#FF4C39]/30'
+              : 'bg-red-50 border border-red-200'
+          }`}
+          role={submissionStatus.success ? "status" : "alert"}
+        >
+          {submissionStatus.success ? (
+            <FiCheckCircle className="text-[#FF4C39] w-5 h-5 flex-shrink-0" />
+          ) : (
+            <FiAlertCircle className="text-red-500 w-5 h-5 flex-shrink-0" />
+          )}
+          <p className={`text-sm ${submissionStatus.success ? 'text-[#FF4C39]' : 'text-red-700'}`}>
+            {submissionStatus.message}
+          </p>
+        </motion.div>
+      </AnimatePresence>
+    );
   };
 
   return (
@@ -68,9 +196,7 @@ const ContactPage = () => {
       <div className="min-h-screen bg-white">
         <Navbar />
 
-        {/* Hero Section */}
         <section className="relative h-[90vh] flex items-center justify-center overflow-hidden">
-          {/* Background Image */}
           <div className="absolute inset-0">
             <img
               src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=2940&auto=format&fit=crop"
@@ -80,7 +206,6 @@ const ContactPage = () => {
             <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70"></div>
           </div>
 
-          {/* Content */}
           <div className="relative z-10 max-w-7xl mx-auto px-4 lg:px-8">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -88,7 +213,14 @@ const ContactPage = () => {
               transition={{ duration: 0.8 }}
               className="text-center"
             >
-              <h2 className="text-base md:text-lg text-[#FF4C39] font-semibold mb-4">
+              <h2 
+                className="text-base md:text-lg font-bold mb-4 px-3 py-1 inline-block rounded bg-black/30 tracking-wider shadow-lg"
+                style={{
+                  ...styles.textShadow,
+                  color: '#FF5A3C',
+                  borderLeft: '3px solid #FF5A3C'
+                }}
+              >
                 YOUR SEARCH FOR THE BEST ENDS HERE
               </h2>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 font-outfit leading-tight">
@@ -100,7 +232,6 @@ const ContactPage = () => {
             </motion.div>
           </div>
 
-          {/* Scroll Indicator */}
           <motion.div
             initial={{ opacity: 0, y: 0 }}
             animate={{ opacity: 1, y: [0, 10, 0] }}
@@ -113,7 +244,6 @@ const ContactPage = () => {
           </motion.div>
         </section>
 
-        {/* Contact Form Section */}
         <section className="py-20 px-4 bg-gray-50">
           <div className="max-w-7xl mx-auto">
             <motion.div
@@ -139,104 +269,145 @@ const ContactPage = () => {
             </motion.div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              <motion.form
+              <motion.div
                 initial={{ opacity: 0, x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6 }}
-                onSubmit={handleSubmit}
                 className="space-y-6 bg-white p-8 rounded-2xl shadow-xl"
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                      Full Name
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FF4C39]/20 focus:border-[#FF4C39] transition-colors"
-                      placeholder="John Doe"
-                    />
+                <StatusMessage />
+                
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                        Full Name
+                      </label>
+                      <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FF4C39]/20 focus:border-[#FF4C39] transition-colors"
+                        placeholder="John Doe"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="work_email" className="block text-sm font-medium text-gray-700 mb-2">
+                        Work Email
+                      </label>
+                      <input
+                        type="email"
+                        id="work_email"
+                        name="work_email"
+                        value={formData.work_email}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FF4C39]/20 focus:border-[#FF4C39] transition-colors"
+                        placeholder="john@company.com"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                      Work Email
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FF4C39]/20 focus:border-[#FF4C39] transition-colors"
-                      placeholder="john@company.com"
-                    />
-                  </div>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                        Phone Number
+                      </label>
+                      <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FF4C39]/20 focus:border-[#FF4C39] transition-colors"
+                        placeholder="+1 (555) 000-0000"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-2">
+                        Company Name
+                      </label>
+                      <input
+                        type="text"
+                        id="company"
+                        name="company"
+                        value={formData.company}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FF4C39]/20 focus:border-[#FF4C39] transition-colors"
+                        placeholder="Company Ltd."
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label htmlFor="number_of_pax" className="block text-sm font-medium text-gray-700 mb-2">
+                        Number of Participants
+                      </label>
+                      <input
+                        type="number"
+                        id="number_of_pax"
+                        name="number_of_pax"
+                        value={formData.number_of_pax || ''}
+                        onChange={handleChange}
+                        required
+                        min="1"
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FF4C39]/20 focus:border-[#FF4C39] transition-colors"
+                        placeholder="10"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="activity_type" className="block text-sm font-medium text-gray-700 mb-2">
+                        Activity Type
+                      </label>
+                      <select
+                        id="activity_type"
+                        name="activity_type"
+                        value={formData.activity_type}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FF4C39]/20 focus:border-[#FF4C39] transition-colors"
+                      >
+                        <option value="outbound">Outbound</option>
+                        <option value="virtual">Virtual</option>
+                        <option value="hybrid">Hybrid</option>
+                        <option value="exploring">Exploring Options</option>
+                      </select>
+                    </div>
+                  </div>
+
                   <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                      Phone Number
+                    <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+                      Tell us about your vision
                     </label>
-                    <input
-                      type="tel"
-                      id="phone"
-                      name="phone"
-                      value={formData.phone}
+                    <textarea
+                      id="message"
+                      name="message"
+                      value={formData.message}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FF4C39]/20 focus:border-[#FF4C39] transition-colors"
-                      placeholder="+1 (555) 000-0000"
+                      rows={6}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FF4C39]/20 focus:border-[#FF4C39] transition-colors resize-none"
+                      placeholder="Share your team building goals and requirements..."
                     />
                   </div>
-                  <div>
-                    <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-2">
-                      Company Name
-                    </label>
-                    <input
-                      type="text"
-                      id="company"
-                      name="company"
-                      value={formData.company}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FF4C39]/20 focus:border-[#FF4C39] transition-colors"
-                      placeholder="Company Ltd."
-                    />
-                  </div>
-                </div>
 
-                <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                    Tell us about your vision
-                  </label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    required
-                    rows={6}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FF4C39]/20 focus:border-[#FF4C39] transition-colors resize-none"
-                    placeholder="Share your team building goals and requirements..."
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-[#FF4C39] to-[#FFB573] text-white rounded-lg font-medium text-lg hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
-                >
-                  Send Message
-                  <FiArrowRight className="ml-2 w-5 h-5" />
-                </button>
-              </motion.form>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-[#FF4C39] to-[#FFB573] text-white rounded-lg font-medium text-lg hover:shadow-lg transition-all duration-300 hover:-translate-y-1 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                  >
+                    {isSubmitting ? 'Sending...' : 'Send Message'}
+                    <FiArrowRight className="ml-2 w-5 h-5" />
+                  </button>
+                </form>
+              </motion.div>
 
               <motion.div
                 initial={{ opacity: 0, x: 30 }}
@@ -285,7 +456,6 @@ const ContactPage = () => {
           </div>
         </section>
 
-        {/* Partners Section */}
         <PartnersSection />
 
         <Footer />

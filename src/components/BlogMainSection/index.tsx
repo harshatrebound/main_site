@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import BlogCard from '../BlogCard';
-import { FiArrowRight } from 'react-icons/fi';
+import { FiArrowLeft, FiArrowRight } from 'react-icons/fi';
 
 // Animation variants
 const fadeInUp = {
@@ -38,26 +38,20 @@ interface BlogPost {
   author: string;
 }
 
-const ViewMoreButton = () => (
-  <div className="relative h-[45px] group w-[180px]">
-    <div className="absolute inset-0 bg-gradient-to-b from-[#ff4c39] to-[#ffb573] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[8px]" />
-    <button className="absolute inset-0 w-full h-full px-6 flex items-center justify-center gap-2 border border-[#979797] rounded-[8px] group-hover:border-transparent transition-colors duration-300">
-      <span className="text-base font-medium font-['DM Sans'] text-[#979797] group-hover:text-white transition-colors duration-300">
-        View More
-      </span>
-      <FiArrowRight className="w-4 h-4 text-[#979797] group-hover:text-white transition-colors duration-300" />
-    </button>
-  </div>
-);
-
-const BlogSection = () => {
+const BlogMainSection = () => {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPosts, setTotalPosts] = useState(0);
+  const postsPerPage = 12;
 
   const { ref, inView } = useInView({
     threshold: 0.1,
     triggerOnce: true
   });
+
+  // Calculate total pages
+  const totalPages = Math.ceil(totalPosts / postsPerPage);
 
   // Fetch blog posts from Supabase
   useEffect(() => {
@@ -65,11 +59,29 @@ const BlogSection = () => {
       try {
         setLoading(true);
 
-        // Build the URL with query parameters
+        // Build the URLs with query parameters
         const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/blog_posts`;
-        const postsUrl = `${url}?select=id,name,slug,small_description,thumbnail_image,published_on,author&order=published_on.desc&limit=3`;
+        
+        // Fetch total count
+        const countResponse = await fetch(
+          `${url}?select=id&order=published_on.desc`, {
+            headers: {
+              'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+              'Content-Type': 'application/json',
+              'Range-Unit': 'items',
+              'Prefer': 'count=exact'
+            }
+          }
+        );
+        
+        const totalCount = parseInt(countResponse.headers.get('content-range')?.split('/')[1] || '0');
+        setTotalPosts(totalCount);
 
-        // Fetch posts
+        // Calculate offset
+        const offset = (currentPage - 1) * postsPerPage;
+        
+        // Fetch posts for current page
+        const postsUrl = `${url}?select=id,name,slug,small_description,thumbnail_image,published_on,author&order=published_on.desc&limit=${postsPerPage}&offset=${offset}`;
         const postsResponse = await fetch(postsUrl, {
           headers: {
             'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
@@ -82,55 +94,22 @@ const BlogSection = () => {
           setBlogPosts(data);
         } else {
           console.error('Failed to fetch blog posts');
-          // Use sample posts as fallback
-          setBlogPosts(samplePosts.slice(0, 3));
+          setBlogPosts([]);
         }
       } catch (error) {
         console.error('Error fetching blog posts:', error);
-        // Use sample posts as fallback
-        setBlogPosts(samplePosts.slice(0, 3));
+        setBlogPosts([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchBlogPosts();
-  }, []);
-
-  // Sample blog posts for development or fallback
-  const samplePosts: BlogPost[] = [
-    {
-      id: 1,
-      name: "Hidden Gems of Europe",
-      slug: "hidden-gems-of-europe",
-      small_description: "Explore lesser-known European destinations that offer charm, culture, and unforgettable experiences.",
-      thumbnail_image: "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?q=80&w=2066&auto=format&fit=crop",
-      published_on: "2023-06-24",
-      author: "Sarah Johnson"
-    },
-    {
-      id: 2,
-      name: "12 Top Team Building PowerPoint Topics",
-      slug: "12-top-team-building-powerpoint-topics",
-      small_description: "Engage your team with these powerful presentation ideas designed to strengthen bonds and improve collaboration.",
-      thumbnail_image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=2070&auto=format&fit=crop",
-      published_on: "2023-04-22",
-      author: "Michael Chen"
-    },
-    {
-      id: 3,
-      name: "How to Plan a Successful Corporate Retreat in 2023",
-      slug: "how-to-plan-a-successful-corporate-retreat-in-2023",
-      small_description: "A comprehensive guide to organizing a memorable and effective corporate retreat that delivers real business value.",
-      thumbnail_image: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=2069&auto=format&fit=crop",
-      published_on: "2023-03-10",
-      author: "Emily Rodriguez"
-    }
-  ];
+  }, [currentPage]);
 
   // Create loading skeletons
   const renderSkeletons = () => {
-    return Array(3).fill(0).map((_, index) => (
+    return Array(12).fill(0).map((_, index) => (
       <div key={index} className="animate-pulse">
         <div className="bg-gray-200 h-48 rounded-t-xl"></div>
         <div className="p-6 space-y-4">
@@ -143,34 +122,49 @@ const BlogSection = () => {
           </div>
           <div className="h-5 bg-gray-200 rounded w-1/4 mt-6"></div>
         </div>
-                </div>
+      </div>
     ));
+  };
+
+  // Handle page changes
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prev => prev - 1);
+      window.scrollTo(0, 0);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(prev => prev + 1);
+      window.scrollTo(0, 0);
+    }
   };
 
   return (
     <section 
-      id="blog-section"
+      id="blog-main-section"
       ref={ref} 
       className="pt-8 pb-20 px-4 lg:px-8 overflow-hidden bg-gray-50"
     >
       <div className="max-w-7xl mx-auto">
+        {/* Header section with the exact style provided */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="mb-12"
         >
           <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6 lg:gap-12 mb-12">
             <div className="flex-1 max-w-2xl">
               <span className="inline-block text-lg font-medium font-['DM Sans'] text-[#636363] mb-2">
-                Latest Insights
+                Our Blog
               </span>
               <h2 className="text-[40px] font-semibold font-['Inter'] leading-tight bg-gradient-to-b from-[#FF4C39] to-[#FFB573] bg-clip-text text-transparent">
-                Explore the Blog.
+                Explore the Latest Insights.
               </h2>
             </div>
             <p className="lg:max-w-md text-left lg:text-right text-base font-normal font-['DM Sans'] text-[#757575] lg:pt-6">
-              Stay updated with the latest trends, insights, and success stories in team building and corporate events
+              Discover valuable content and industry trends with our expertly crafted articles. Stay informed and inspired.
             </p>
           </div>
         </motion.div>
@@ -199,20 +193,36 @@ const BlogSection = () => {
           )}
         </motion.div>
 
-        {/* View More Button */}
+        {/* Pagination */}
+        {!loading && totalPages > 1 && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.5, delay: 0.3 }}
-          className="flex justify-center"
+            className="flex justify-center items-center gap-6"
           >
-          <a href="/blog" onClick={() => window.scrollTo(0, 0)}>
-              <ViewMoreButton />
-            </a>
+            <button
+              onClick={handlePrevPage}
+              disabled={currentPage === 1}
+              className="flex items-center gap-2 px-6 py-3 border border-[#979797] rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:border-[#FF4C39] transition-colors"
+            >
+              <FiArrowLeft className="w-5 h-5" />
+              <span>Previous</span>
+            </button>
+
+            <button
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              className="flex items-center gap-2 px-6 py-3 border border-[#979797] rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:border-[#FF4C39] transition-colors"
+            >
+              <span>Next</span>
+              <FiArrowRight className="w-5 h-5" />
+            </button>
           </motion.div>
+        )}
       </div>
     </section>
   );
 };
 
-export default BlogSection;
+export default BlogMainSection; 

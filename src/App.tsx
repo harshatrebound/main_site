@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async';
 import useSkipSearchPopup from './hooks/useSkipSearchPopup';
 import SkipSearchPopup from './components/SkipSearchPopup';
 import Navbar from './components/Navbar';
@@ -17,47 +18,77 @@ function App() {
   const { isVisible, closePopup } = useSkipSearchPopup();
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-white">
-      {/* Main Content */}
-      <main>
-        {/* Hero Section */}
-        <GradientHero />
+    <>
+      <Helmet>
+        <title>Trebound | Premium Team Building & Corporate Events Solutions</title>
+        <meta 
+          name="description" 
+          content="Trebound is your trusted partner for exceptional team building experiences and corporate events. We create transformative experiences that strengthen teams and drive success."
+        />
+        <meta name="keywords" content="team building, corporate events, team development, outbound training, corporate retreats, employee engagement" />
+        <meta name="author" content="Trebound" />
+        <meta name="robots" content="index, follow" />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Trebound" />
+        <meta property="og:title" content="Trebound | Premium Team Building & Corporate Events Solutions" />
+        <meta property="og:description" content="Trebound is your trusted partner for exceptional team building experiences and corporate events. We create transformative experiences that strengthen teams and drive success." />
+        <meta property="og:url" content={window.location.href} />
+        <meta property="og:image" content="/trebound_logos_icons/favicons/Trebound_Favicon_blue-32px.jpg" />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Trebound | Premium Team Building & Corporate Events Solutions" />
+        <meta name="twitter:description" content="Trebound is your trusted partner for exceptional team building experiences and corporate events. We create transformative experiences that strengthen teams and drive success." />
+        <meta name="twitter:image" content="/trebound_logos_icons/favicons/Trebound_Favicon_blue-32px.jpg" />
+        
+        {/* Additional SEO */}
+        <link rel="canonical" href={window.location.href} />
+      </Helmet>
 
-        {/* Main Navigation */}
-        <Navbar />
+      <div className="relative min-h-screen overflow-x-hidden bg-white">
+        {/* Main Content */}
+        <main>
+          {/* Hero Section */}
+          <GradientHero />
 
-        {/* Services Section */}
-        <ServicesSection />
+          {/* Main Navigation */}
+          <Navbar />
 
-        {/* Steps Section */}
-        <StepsSection />
+          {/* Services Section */}
+          <ServicesSection />
 
-        {/* Outbound Experiences */}
-        <OutboundSection />
+          {/* Steps Section */}
+          <StepsSection />
 
-        {/* Top Destinations */}
-        <DestinationsSection />
+          {/* Outbound Experiences */}
+          <OutboundSection />
 
-        {/* Inbound Experiences */}
-        <InboundSection />
+          {/* Top Destinations */}
+          <DestinationsSection />
 
-        {/* Blog Section */}
-        <BlogSection />
+          {/* Inbound Experiences */}
+          <InboundSection />
 
-        {/* Testimonials */}
-        <TestimonialsSection />
+          {/* Blog Section */}
+          <BlogSection />
 
-        {/* Partners Section */}
-        <PartnersSection />
+          {/* Testimonials */}
+          <TestimonialsSection />
 
-        {/* Contact Form */}
-        <ContactSection />
+          {/* Partners Section */}
+          <PartnersSection />
 
-        {/* Footer */}
-        <Footer />
-      </main>
-      <SkipSearchPopup isVisible={isVisible} onClose={closePopup} />
-    </div>
+          {/* Contact Form */}
+          <ContactSection />
+
+          {/* Footer */}
+          <Footer />
+        </main>
+        <SkipSearchPopup isVisible={isVisible} onClose={closePopup} />
+      </div>
+    </>
   );
 }
 

@@ -60,6 +60,7 @@ const ExploreButton = ({ slug, text = "Explore" }: { slug: string; text?: string
     <div className="absolute inset-0 bg-gradient-to-b from-[#ff4c39] to-[#ffb573] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[8px]" />
     <a 
       href={`/${slug}`}
+      onClick={() => window.scrollTo(0, 0)}
       className="absolute inset-0 w-full h-full flex items-center justify-center gap-2 border border-[#b1b1b1] rounded-[8px] group-hover:border-transparent transition-colors duration-300"
     >
       <span className="text-base font-bold font-['DM Sans'] text-[#b1b1b1] group-hover:text-white transition-colors duration-300">
@@ -117,7 +118,7 @@ const ServicesSection: React.FC = () => {
             title: stay.name || stay.title || 'Default Title',
             description: stay.tagline || stay.description || '',
             image: stay.stay_image || stay.image_url || '/placeholder-image.jpg',
-            slug: stay.slug,
+            slug: `stays/${stay.slug}`,
             location: String(stay.destination) || 'Destination Not Set',
             price: stay.price_per_night ? `₹${stay.price_per_night}/night` : 'Contact for price'
           }));
@@ -132,7 +133,7 @@ const ServicesSection: React.FC = () => {
             title: activity.name,
             description: activity.tagline,
             image: activity.main_image,
-            slug: activity.slug,
+            slug: `team-building-activity/${activity.slug}`,
             participants: activity.group_size || '20-1000',
             duration: activity.activity_type || 'Outbound',
             time: activity.duration || '60 Mins'
@@ -148,7 +149,7 @@ const ServicesSection: React.FC = () => {
             title: training.name,
             description: training.tagline,
             image: training.banner_image,
-            slug: training.slug,
+            slug: `customized-training/${training.slug}`,
             participants: training.group_size || '15-20',
             duration: 'Training',
             time: training.activity_time || '2-3 Days'
@@ -319,7 +320,12 @@ const ServicesSection: React.FC = () => {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="flex justify-center"
             >
-              <a href={`/${activeTab}`}>
+              <a 
+                href={`/${activeTab === 'trainings' ? 'customized-training' : 
+                         activeTab === 'activities' ? 'team-building-activity' :
+                         'stays'}`}
+                onClick={() => window.scrollTo(0, 0)}
+              >
                 <ViewMoreButton />
               </a>
             </motion.div>

@@ -5,6 +5,7 @@ import { FiSearch, FiMapPin, FiStar, FiArrowRight, FiHome, FiClock } from 'react
 import { supabase } from '../../lib/supabaseClient';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import { Helmet } from 'react-helmet-async';
 
 interface Stay {
   id: number;
@@ -261,6 +262,32 @@ const Stays = () => {
 
   return (
     <>
+      <Helmet>
+        <title>Corporate Stays & Team Retreats | Accommodation Solutions | Trebound</title>
+        <meta 
+          name="description" 
+          content="Find perfect accommodations for your corporate team retreats and events. Trebound offers carefully curated stays that combine comfort, convenience, and team-building opportunities."
+        />
+        <meta name="keywords" content="corporate stays, team retreats, business accommodation, corporate housing, team lodging" />
+        <meta name="author" content="Trebound" />
+        <meta name="robots" content="index, follow" />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Trebound" />
+        <meta property="og:title" content="Corporate Stays & Team Retreats | Accommodation Solutions | Trebound" />
+        <meta property="og:description" content="Find perfect accommodations for your corporate team retreats and events. Trebound offers carefully curated stays that combine comfort, convenience, and team-building opportunities." />
+        <meta property="og:url" content={window.location.href} />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Corporate Stays & Team Retreats | Accommodation Solutions | Trebound" />
+        <meta name="twitter:description" content="Find perfect accommodations for your corporate team retreats and events. Trebound offers carefully curated stays that combine comfort, convenience, and team-building opportunities." />
+        
+        {/* Additional SEO */}
+        <link rel="canonical" href={window.location.href} />
+      </Helmet>
+
       <Navbar />
       <div className="min-h-screen bg-[#f8f9fa]">
         {/* Hero Section */}

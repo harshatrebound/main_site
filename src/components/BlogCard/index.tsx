@@ -28,7 +28,11 @@ const BlogCard = ({ title, slug, description, image, date, variants }: BlogCardP
         transition: { duration: 0.3 }
       }}
     >
-      <Link to={`/blog/${slug}`} className="block h-full flex flex-col">
+      <Link 
+        to={`/blog/${slug}`} 
+        className="block h-full flex flex-col"
+        onClick={() => window.scrollTo(0, 0)}
+      >
         <div className="relative h-48 md:h-60 overflow-hidden">
           <img 
             src={image || fallbackImage} 

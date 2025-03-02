@@ -202,7 +202,9 @@ const OutboundSection = () => {
                   </div>
 
                   <div className="mt-4">
-                    <ViewDetailsButton />
+                    <a href={`/team-building-activity/${experience.slug}`}>
+                      <ViewDetailsButton />
+                    </a>
                   </div>
                 </div>
               </motion.div>
@@ -218,7 +220,7 @@ const OutboundSection = () => {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="w-full max-w-[200px]"
           >
-            <a href="/activities">
+            <a href="/team-building-activity">
               <ViewMoreButton />
             </a>
           </motion.div>

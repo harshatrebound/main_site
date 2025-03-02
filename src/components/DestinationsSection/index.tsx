@@ -96,30 +96,32 @@ const DestinationsSection = () => {
                 transition={{ duration: 0.5 }}
                 className="relative rounded-[16px] overflow-hidden group cursor-pointer w-full"
               >
-                <div className="w-full aspect-[2.4/1]">
-                  <img
-                    src={destination.image}
-                    alt={destination.title}
-                    className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
-                  />
-                  {/* Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  
-                  {/* Destination Details */}
-                  <div className="absolute bottom-0 left-0 p-5 md:p-6 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                    <div className="text-xl md:text-2xl font-medium font-['Outfit'] text-[#faf9f6] leading-tight">
-                      {destination.location}
-                    </div>
-                    <div className="text-2xl md:text-[32px] font-medium font-['Outfit'] text-[#faf9f6] leading-tight mt-2">
-                      {destination.title}
-                    </div>
-                    {destination.description && (
-                      <div className="text-base text-[#faf9f6]/90 mt-2 line-clamp-2">
-                        {destination.description}
+                <a href={`/corporate-team-outing-places/${destination.slug}`}>
+                  <div className="w-full aspect-[2.4/1]">
+                    <img
+                      src={destination.image}
+                      alt={destination.title}
+                      className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                    />
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    
+                    {/* Destination Details */}
+                    <div className="absolute bottom-0 left-0 p-5 md:p-6 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                      <div className="text-xl md:text-2xl font-medium font-['Outfit'] text-[#faf9f6] leading-tight">
+                        {destination.location}
                       </div>
-                    )}
+                      <div className="text-2xl md:text-[32px] font-medium font-['Outfit'] text-[#faf9f6] leading-tight mt-2">
+                        {destination.title}
+                      </div>
+                      {destination.description && (
+                        <div className="text-base text-[#faf9f6]/90 mt-2 line-clamp-2">
+                          {destination.description}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
+                </a>
               </motion.div>
             ))}
 
@@ -133,30 +135,32 @@ const DestinationsSection = () => {
                   transition={{ duration: 0.5, delay: index * 0.08 }}
                   className="relative rounded-[16px] overflow-hidden group cursor-pointer"
                 >
-                  <div className="w-full aspect-[1.2/1]">
-                    <img
-                      src={destination.image}
-                      alt={destination.title}
-                      className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
-                    />
-                    {/* Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    
-                    {/* Destination Details */}
-                    <div className="absolute bottom-0 left-0 p-4 md:p-5 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                      <div className="text-lg md:text-xl font-medium font-['Outfit'] text-[#faf9f6] leading-tight">
-                        {destination.location}
-                      </div>
-                      <div className="text-xl md:text-2xl font-medium font-['Outfit'] text-[#faf9f6] leading-tight mt-2">
-                        {destination.title}
-                      </div>
-                      {destination.description && (
-                        <div className="text-sm text-[#faf9f6]/90 mt-2 line-clamp-2">
-                          {destination.description}
+                  <a href={`/corporate-team-outing-places/${destination.slug}`}>
+                    <div className="w-full aspect-[1.2/1]">
+                      <img
+                        src={destination.image}
+                        alt={destination.title}
+                        className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                      />
+                      {/* Gradient Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      
+                      {/* Destination Details */}
+                      <div className="absolute bottom-0 left-0 p-4 md:p-5 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                        <div className="text-lg md:text-xl font-medium font-['Outfit'] text-[#faf9f6] leading-tight">
+                          {destination.location}
                         </div>
-                      )}
+                        <div className="text-xl md:text-2xl font-medium font-['Outfit'] text-[#faf9f6] leading-tight mt-2">
+                          {destination.title}
+                        </div>
+                        {destination.description && (
+                          <div className="text-sm text-[#faf9f6]/90 mt-2 line-clamp-2">
+                            {destination.description}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  </a>
                 </motion.div>
               ))}
             </div>
@@ -170,7 +174,7 @@ const DestinationsSection = () => {
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <a href="/destinations">
+            <a href="/corporate-team-outing-places">
               <ViewMoreButton />
             </a>
           </motion.div>
