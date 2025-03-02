@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
+import { generateSitemap } from './utils/sitemapGenerator'
 import './index.css'
 import App from './App.tsx'
 import TeamOutingRegions from './pages/TeamOutingRegions'
@@ -25,6 +26,20 @@ import { CombinedProvider } from './contexts/TeamOutingAdsContext'
 import CustomizedTrainingPage from './pages/CustomizedTraining'
 import CustomizedTrainingDetail from './pages/CustomizedTraining/[slug]'
 import ContactPage from './pages/Contact'
+import { useEffect } from 'react'
+
+const SitemapComponent = () => {
+  useEffect(() => {
+    const fetchSitemap = async () => {
+      const sitemap = await generateSitemap();
+      const blob = new Blob([sitemap], { type: 'application/xml' });
+      const url = window.URL.createObjectURL(blob);
+      window.location.href = url;
+    };
+    fetchSitemap();
+  }, []);
+  return null;
+};
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -33,6 +48,7 @@ createRoot(document.getElementById('root')!).render(
         <Router>
           <Routes>
             <Route path="/" element={<App />} />
+            <Route path="/sitemap.xml" element={<SitemapComponent />} />
             <Route path="/team-outing-regions" element={<TeamOutingRegions />} />
             <Route path="/team-outing-regions/:regionSlug" element={<Destinations />} />
             <Route path="/corporate-team-outing-places" element={<CorporateTeamOutingPlaces />} />

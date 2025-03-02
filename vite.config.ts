@@ -10,4 +10,14 @@ export default defineConfig({
   optimizeDeps: {
     include: ['react', 'react-dom', 'framer-motion', 'react-intersection-observer'],
   },
+  build: {
+    rollupOptions: {
+      input: {
+        main: './index.html',
+      },
+    },
+    outDir: 'dist',
+    assetsDir: 'assets',
+    copyPublicDir: true,
+  },
 })
